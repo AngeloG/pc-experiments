@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PlayCanvas Experiments</title>
+		<script src="pc.js"></script>
+		<style>
+			body {
+				padding: 0px;
+				margin: 0px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<canvas id="app"></canvas>
+
+		<script>
+			var canvas = document.getElementById('app');
+			var app = new pc.Application(canvas);
+			app.start();
+
+			app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+			app.setCanvasResolution(pc.RESOLUTION_AUTO);
+
+			app.scene.ambientLight = new pc.Color(0.2, 0.2, 0.3);
+
+			var boxes = [];
+
+			for(var i=0; i<10; i++) {
+				var row = [];
+				for(var y=0; y<10; y++) {
+					var box = new pc.Entity();
+					box.addComponent('model', {
+						type: 'box',
+						castShadows: true,
+						receiveShadows: true
+					});
+					app.root.addChild(box);
+					box.translate(i * 1.1, y * 1.1, 0);
+					row.push(box);
+				}
+				boxes.push(row);
+			}
+
+			var light = new pc.Entity();
+			light.addComponent('light', {
+				type: 'point',
+				color: new pc.Color(0.5, 0.3, 1.0),
+				radius: 15
+			});
+			app.root.addChild(light);
+
+			var camera = new pc.Entity();
+			camera.addComponent('camera', {
+				clearColor: new pc.Color(0.1, 0.1, 0.15),
+				fov: 90
+			});
+			app.root.addChild(camera);
+
+			camera.translate(5, 5, 7.5);
+
+			var frame = 0;
+			app.on('update', function(dt) {
+				frame += dt;
+				light.setLocalPosition(5 + Math.sin(frame) * 5, 5 + Math.cos(frame) * 5, Math.sin(frame) * 3);
+
+				camera.setLocalPosition(5 + Math.sin(frame * 0.3) * 7.5, 5 + Math.sin(frame) * 2, Math.cos(frame * 0.3) * 10);
+				camera.lookAt(new pc.Vec3(5, 5, 0));
+
+				for(var y=0; y<10; y++) {
+					for(var x=0; x<10; x++) {
+						boxes[y][x].setEulerAngles(Math.sin(frame - x * 0.5) * 20, Math.cos(frame - y * 0.5) * 20, 0);
+					}
+				}
+			});
+		</script>
+	</body>
+</html>
